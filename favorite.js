@@ -11,6 +11,27 @@
   const data = JSON.parse(localStorage.getItem('favoriteMovies')) || []
   let displayStyle = true
   let pageNum = 1
+  const listName = {
+    "1": "Action",
+    "2": "Adventure",
+    "3": "Animation",
+    "4": "Comedy",
+    "5": "Crime",
+    "6": "Documentary",
+    "7": "Drama",
+    "8": "Family",
+    "9": "Fantasy",
+    "10": "History",
+    "11": "Horror",
+    "12": "Music",
+    "13": "Mystery",
+    "14": "Romance",
+    "15": "Science Fiction",
+    "16": "TV Movie",
+    "17": "Thriller",
+    "18": "War",
+    "19": "Western"
+  }
 
   getTotalPages(data)
   getPageData(pageNum, data)
@@ -68,15 +89,20 @@
     if (displayStyle) {
       dataTable.innerHTML = ''
       data.forEach(function (item, index) {
+        let tagContent = ''
+        item.genres.forEach(function (num) {
+          tagContent += `
+          <span class="badge badge-light font-weight-light">${listName[num]}</span>
+          `
+        })
         htmlContent += `
-        <div class="col-sm-3">
+        <div class="col-sm-3 pr-0">
           <div class="card mb-2">
             <img class="card-img-top " src="${POSTER_URL}${item.image}" alt="Card image cap">
             <div class="card-body movie-item-body">
               <h6 class="card-title">${item.title}</h5>
             </div>
-
-            
+            <div class="tagfield">${tagContent}</div>
             <div class="card-footer">
               <!-- "More" button -->
               <button class="btn btn-primary btn-show-movie" data-toggle="modal" data-target="#show-movie-modal" data-id="${item.id}">More</button>
@@ -85,17 +111,25 @@
           </div>
         </div>
       `
+
       })
       dataPanel.innerHTML = htmlContent
     } else {
       dataPanel.innerHTML = ''
       data.forEach(function (item, index) {
+        let tagContent = ''
+        item.genres.forEach(function (num) {
+          tagContent += `
+          <span class="badge badge-light font-weight-light">${listName[num]}</span>
+          `
+        })
         htmlContent += `
         <tr>
           <td>
             <div>
              <h6 class="card-title">${item.title}</h5>
             </div>
+            <div class="tagfield">${tagContent}</div>
           </td>
           <td>
             <div>
@@ -110,6 +144,7 @@
       dataTable.innerHTML = htmlContent
     }
   }
+
 
   function showMovie(id) {
     // get elements

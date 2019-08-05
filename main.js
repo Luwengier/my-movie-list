@@ -3,16 +3,37 @@
   const INDEX_URL = BASE_URL + '/api/v1/movies/'
   const POSTER_URL = BASE_URL + '/posters/'
   const data = []
-
   const dataPanel = document.getElementById('data-panel')
   const dataTable = document.getElementById('data-table')
   const dataListener = document.getElementById('data-listener')
   const switchBar = document.getElementById('switch-bar')
   const pagination = document.getElementById('pagination')
+  const listPanel = document.getElementById('list-panel')
   const ITEM_PER_PAGE = 12
   let paginationData = []
   let displayStyle = true
   let pageNum = 1
+  const listName = {
+    "1": "Action",
+    "2": "Adventure",
+    "3": "Animation",
+    "4": "Comedy",
+    "5": "Crime",
+    "6": "Documentary",
+    "7": "Drama",
+    "8": "Family",
+    "9": "Fantasy",
+    "10": "History",
+    "11": "Horror",
+    "12": "Music",
+    "13": "Mystery",
+    "14": "Romance",
+    "15": "Science Fiction",
+    "16": "TV Movie",
+    "17": "Thriller",
+    "18": "War",
+    "19": "Western"
+  }
 
   axios.get(INDEX_URL).then((response) => {
     data.push(...response.data.results)
@@ -22,6 +43,9 @@
     getPageData(1, data)
   }).catch((err) => console.log(err))
 
+  //list nav
+  displayList()
+
   //listen to switch bar
   switchBar.addEventListener('click', (event) => {
     if (event.target.matches('.th')) {
@@ -30,8 +54,8 @@
       displayStyle = false
     }
     console.log(displayStyle)
-    getTotalPages(data)
-    getPageData(pageNum, data)
+    getTotalPages(results || data)
+    getPageData(pageNum, results || data)
   })
 
   //listen to data panel
@@ -46,9 +70,19 @@
   const searchForm = document.getElementById('search')
   const searchInput = document.getElementById('search-input')
 
+  //listen to tag panel
+  listPanel.addEventListener('click', (event) => {
+    pageNum = 1
+    if (event.target.matches('.list-group-item')) {
+      results = data.filter(movie => movie.genres.includes(Number(event.target.dataset.tagnum)))
+      console.log(results)
+      getTotalPages(results)
+      getPageData(pageNum, results)
+    }
+  })
+
 
   // listen to search form submit event
-
   searchForm.addEventListener('submit', event => {
     event.preventDefault()
 
@@ -77,15 +111,20 @@
     if (displayStyle) {
       dataTable.innerHTML = ''
       data.forEach(function (item, index) {
+        let tagContent = ''
+        item.genres.forEach(function (num) {
+          tagContent += `
+          <span class="badge badge-light font-weight-light">${listName[num]}</span>
+          `
+        })
         htmlContent += `
-        <div class="col-sm-3">
+        <div class="col-sm-3 pr-0">
           <div class="card mb-2">
             <img class="card-img-top " src="${POSTER_URL}${item.image}" alt="Card image cap">
             <div class="card-body movie-item-body">
               <h6 class="card-title">${item.title}</h5>
             </div>
-
-            
+            <div class="tagfield">${tagContent}</div>
             <div class="card-footer">
               <!-- "More" button -->
               <button class="btn btn-primary btn-show-movie" data-toggle="modal" data-target="#show-movie-modal" data-id="${item.id}">More</button>
@@ -95,17 +134,25 @@
           </div>
         </div>
       `
+
       })
       dataPanel.innerHTML = htmlContent
     } else {
       dataPanel.innerHTML = ''
       data.forEach(function (item, index) {
+        let tagContent = ''
+        item.genres.forEach(function (num) {
+          tagContent += `
+          <span class="badge badge-light font-weight-light">${listName[num]}</span>
+          `
+        })
         htmlContent += `
         <tr>
           <td>
             <div>
              <h6 class="card-title">${item.title}</h5>
             </div>
+            <div class="tagfield">${tagContent}</div>
           </td>
           <td>
             <div>
@@ -165,7 +212,7 @@
     for (let i = 0; i < totalPages; i++) {
       pageItemContent += `
         <li class="page-item">
-          <a class="page-link" href="javascript:;" data-page="${i + 1}">${i + 1}</a>
+          <a class="page-link" href="javascript:;" data-page="${i + 1}">${i + 1} </a>
         </li>
       `
     }
@@ -178,6 +225,17 @@
     let pageData = paginationData.slice(offset, offset + ITEM_PER_PAGE)
     displayDataList(pageData)
   }
+
+  function displayList() {
+    let htmlContent = ''
+    for (let item in listName) {
+      htmlContent += `
+      <button class="list-group-item list-group-item-action" data-tagnum = ${item} data-toggle="list">${listName[item]}</button>
+      `
+    }
+    listPanel.innerHTML = htmlContent
+  }
+
 
 
 })()
